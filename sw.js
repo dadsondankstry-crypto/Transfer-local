@@ -1,4 +1,5 @@
-const CACHE = 'transflocal-v1';
+// ALTERE ESSA VERSÃO TODA VEZ QUE MUDAR O index.html
+const CACHE = 'transflocal-v1.3';
 
 const LOCAL_ASSETS = [
   './',
@@ -36,7 +37,7 @@ self.addEventListener('install', (e) => {
     for (const url of ALL) {
       await precache(cache, url);
     }
-    self.skipWaiting();
+    self.skipWaiting(); // Força o novo SW a assumir imediatamente
   })());
 });
 
@@ -44,9 +45,9 @@ self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
     await Promise.all(
-      keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+      keys.filter(k => k !== CACHE).map(k => caches.delete(k)) // Apaga caches antigos
     );
-    self.clients.claim();
+    self.clients.claim(); // Assume o controle das abas abertas
   })());
 });
 

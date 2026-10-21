@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#58a6ff">
-<title>TransfLocal 1.2 — Transferência Offline</title>
+<title>TransfLocal v1.3 — Transferência Offline</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -29,7 +29,12 @@
     padding-bottom: 5rem;
     overscroll-behavior: none;
   }
-  h1 { font-size: 1.6rem; margin-bottom: 0.3rem; background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  
+  /* Título e Versão */
+  .header-container { margin-bottom: 0.3rem; display: flex; align-items: baseline; gap: 0.6rem; }
+  h1 { font-size: 1.6rem; background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: inline-block; }
+  .version-badge { font-size: 0.75rem; font-weight: 700; color: var(--accent-2); background: rgba(126, 231, 135, 0.1); border: 1px solid rgba(126, 231, 135, 0.3); padding: 0.1rem 0.4rem; border-radius: 6px; letter-spacing: 0.05em; }
+  
   h2 { font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--accent); }
   h3 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--accent-2); }
   p { margin-bottom: 0.8rem; line-height: 1.5; color: var(--fg-dim); }
@@ -238,7 +243,10 @@
 
 <!-- ============ HOME ============ -->
 <div id="screen-home" class="screen active">
-  <h1>TransfLocal</h1>
+  <div class="header-container">
+    <h1>TransfLocal</h1>
+    <span class="version-badge">v1.3</span>
+  </div>
   <p class="subtitle">Transferência de arquivos offline via hotspot · sem internet · sem servidor</p>
 
   <div class="card">
@@ -793,8 +801,15 @@
     sendFiles(files);
   });
 
-  // ---------- Register SW ----------
+  // ---------- Register SW & Auto-Reload ----------
   if ('serviceWorker' in navigator) {
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').catch(err => {
         console.warn('SW registration failed:', err);
