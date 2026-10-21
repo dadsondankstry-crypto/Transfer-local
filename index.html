@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#58a6ff">
-<title>TransfLocal v1.3 — Transferência Offline</title>
+<title>TransfLocal v1.4 — Transferência Offline</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -30,7 +30,6 @@
     overscroll-behavior: none;
   }
   
-  /* Título e Versão */
   .header-container { margin-bottom: 0.3rem; display: flex; align-items: baseline; gap: 0.6rem; }
   h1 { font-size: 1.6rem; background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: inline-block; }
   .version-badge { font-size: 0.75rem; font-weight: 700; color: var(--accent-2); background: rgba(126, 231, 135, 0.1); border: 1px solid rgba(126, 231, 135, 0.3); padding: 0.1rem 0.4rem; border-radius: 6px; letter-spacing: 0.05em; }
@@ -78,23 +77,15 @@
     cursor: pointer;
     margin-bottom: 1rem;
   }
-  .btn-link {
-    background: none;
-    border: none;
-    color: var(--accent);
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: 0.85rem;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-    display: inline-block;
-  }
+  
+  .btn-row { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
+  .btn-row .btn { margin: 0; padding: 0.8rem; font-size: 0.9rem; }
 
   .qr-container {
     background: white;
     padding: 0.5rem;
     border-radius: 12px;
-    margin: 1rem auto;
+    margin: 1.5rem auto;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -103,22 +94,29 @@
   }
   .qr-container canvas,
   .qr-container img {
-    width: 260px !important;
-    height: 260px !important;
+    width: 320px !important;
+    height: 320px !important;
     max-width: 100%;
     display: block;
   }
 
-  .code-box {
+  details.code-box {
     margin: 1rem 0;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 0.5rem;
+    padding: 0.8rem;
   }
-  .code-box textarea {
+  details.code-box summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 600;
+    user-select: none;
+  }
+  details.code-box textarea {
     width: 100%;
-    height: 70px;
+    height: 80px;
     background: transparent;
     border: none;
     color: var(--fg-dim);
@@ -127,6 +125,7 @@
     resize: none;
     outline: none;
     word-break: break-all;
+    margin-top: 0.8rem;
   }
 
   .video-container {
@@ -228,15 +227,6 @@
     cursor: pointer;
     margin-right: 0.8rem;
   }
-
-  .steps {
-    list-style: decimal;
-    margin-left: 1.2rem;
-    color: var(--fg-dim);
-    font-size: 0.9rem;
-    line-height: 1.7;
-  }
-  .steps li { margin-bottom: 0.3rem; }
 </style>
 </head>
 <body>
@@ -245,50 +235,46 @@
 <div id="screen-home" class="screen active">
   <div class="header-container">
     <h1>TransfLocal</h1>
-    <span class="version-badge">v1.3</span>
+    <span class="version-badge">v1.4</span>
   </div>
-  <p class="subtitle">Transferência de arquivos offline via hotspot · sem internet · sem servidor</p>
+  <p class="subtitle">Transferência de arquivos offline via hotspot</p>
 
   <div class="card">
     <h2>📤 Criar Sala</h2>
-    <p>Este dispositivo gera o convite. Ideal para o celular que está com o hotspot.</p>
+    <p>Este dispositivo inicia a conexão.</p>
     <button id="btnCreate" class="btn primary">Criar Sala</button>
   </div>
 
   <div class="card">
     <h2>📥 Entrar em Sala</h2>
-    <p>Este dispositivo escaneia o convite do outro. Ideal para o computador.</p>
+    <p>Este dispositivo conecta ao outro.</p>
     <button id="btnJoin" class="btn secondary">Entrar em Sala</button>
-    <button id="btnJoinPaste" class="btn-link" style="text-align:center; width:100%;">Ou colar código de convite manualmente</button>
-  </div>
-
-  <div class="card">
-    <h3>Como funciona</h3>
-    <ol class="steps">
-      <li>Instale o app nos dois dispositivos (com internet).</li>
-      <li>Desligue tudo. Ligue só o hotspot do celular.</li>
-      <li>Conecte o PC ao hotspot.</li>
-      <li>Abra o app nos dois e siga as instruções.</li>
-    </ol>
   </div>
 </div>
 
 <!-- ============ CREATE ============ -->
 <div id="screen-create" class="screen">
-  <button class="btn-back" data-back>← Voltar</button>
-  <h2>Criar Sala</h2>
-  <p>Peça para o outro dispositivo escanear este QR Code:</p>
+  <button class="btn-back" data-back>← Cancelar</button>
+  <h2>Passo 1: Mostre este Código</h2>
+  <p>No <strong>outro dispositivo</strong>, clique em "Entrar em Sala" e escaneie o código abaixo:</p>
   
   <div id="qrOffer" class="qr-container"></div>
   
-  <div class="code-box">
-    <p style="font-size: 0.8rem; margin-bottom: 0.3rem;">Se preferir, envie este código de texto:</p>
-    <textarea id="codeOfferText" readonly></textarea>
-    <button id="btnCopyOffer" class="btn-link" style="margin: 0; padding: 0.2rem 0;">Copiar código</button>
+  <hr style="border-color: var(--border); margin: 1.5rem 0;">
+  
+  <h3>Passo 2: Receber a Resposta</h3>
+  <p>Após o outro dispositivo escanear, ele vai gerar um <strong>novo código</strong>. Você precisa escaneá-lo agora:</p>
+  
+  <div class="btn-row">
+    <button id="btnScanAnswer" class="btn secondary">📷 Escanear Resposta</button>
+    <button id="btnPasteAnswer" class="btn primary" style="background: var(--bg-card); border: 1px solid var(--border);">📋 Colar Resposta</button>
   </div>
 
-  <button id="btnScanAnswer" class="btn secondary" style="margin-top: 1rem;">📷 Escanear Resposta</button>
-  <button id="btnPasteAnswer" class="btn-link" style="text-align:center; width:100%;">Ou colar código de resposta manualmente</button>
+  <details class="code-box">
+    <summary>Mostrar código de Oferta em texto</summary>
+    <textarea id="codeOfferText" readonly></textarea>
+    <button id="btnCopyOffer" class="btn primary" style="padding: 0.4rem; font-size: 0.8rem; margin-top: 0.5rem;">Copiar Oferta</button>
+  </details>
 </div>
 
 <!-- ============ SCAN ============ -->
@@ -305,16 +291,18 @@
 <!-- ============ ANSWER ============ -->
 <div id="screen-answer" class="screen">
   <button class="btn-back" data-back>← Cancelar</button>
-  <h2>Resposta Gerada</h2>
-  <p>Mostre este QR Code para o outro dispositivo escanear:</p>
+  <h2>Passo 3: Mostre a Resposta</h2>
+  <p>O outro dispositivo (que criou a sala) precisa escanear o código abaixo para finalizar a conexão:</p>
   
   <div id="qrAnswer" class="qr-container"></div>
 
-  <div class="code-box">
-    <p style="font-size: 0.8rem; margin-bottom: 0.3rem;">Se o QR Code não funcionar, envie este código de resposta:</p>
+  <button id="btnCopyAnswerTop" class="btn primary" style="margin-top: 1rem;">📋 Copiar Código de Resposta</button>
+
+  <details class="code-box">
+    <summary>Mostrar código de Resposta em texto</summary>
     <textarea id="codeAnswerText" readonly></textarea>
-    <button id="btnCopyAnswer" class="btn-link" style="margin: 0; padding: 0.2rem 0;">Copiar código</button>
-  </div>
+    <button id="btnCopyAnswer" class="btn primary" style="padding: 0.4rem; font-size: 0.8rem; margin-top: 0.5rem;">Copiar Resposta</button>
+  </details>
 </div>
 
 <!-- ============ CONNECTED ============ -->
@@ -390,7 +378,8 @@
     scanStream: null,
   };
 
-  const RTC_CONFIG = { iceServers: [] };
+  // Adicionado STUN do Google para ajudar na descoberta de rede local
+  const RTC_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
   const CHUNK_SIZE = 16 * 1024;
   const BUFFER_THRESHOLD = 1024 * 1024;
 
@@ -419,16 +408,6 @@
     state.scanPurpose = 'offer';
     showScreen('scan');
     startScanning();
-  });
-
-  $('btnJoinPaste').addEventListener('click', () => {
-    const code = prompt('Cole o código do convite (Oferta) enviado pelo outro dispositivo:');
-    if (code && code.trim()) {
-      cleanup();
-      state.mode = 'join';
-      state.scanPurpose = 'offer';
-      handleScanned(code.trim());
-    }
   });
 
   document.querySelectorAll('[data-back]').forEach(btn => {
@@ -472,7 +451,7 @@
         }
       };
 
-      setStatus('Escaneie ou copie o código', 'info');
+      setStatus('Aguardando leitura...', 'info');
 
       $('btnScanAnswer').onclick = () => {
         state.scanPurpose = 'answer';
@@ -481,7 +460,7 @@
       };
 
       $('btnPasteAnswer').onclick = () => {
-        const code = prompt('Cole o código da resposta do outro dispositivo:');
+        const code = prompt('Cole o código da RESPOSTA do outro dispositivo:');
         if (code && code.trim()) handleScanned(code.trim());
       };
     } catch (err) {
@@ -515,7 +494,7 @@
       displayQR('qrAnswer', payload);
       $('codeAnswerText').value = payload;
       
-      $('btnCopyAnswer').onclick = async () => {
+      const copyFunc = async () => {
         try {
           await navigator.clipboard.writeText(payload);
           setStatus('Código copiado!', 'success');
@@ -526,10 +505,14 @@
         }
       };
       
-      setStatus('Mostre ou envie este código de resposta', 'info');
+      $('btnCopyAnswer').onclick = copyFunc;
+      $('btnCopyAnswerTop').onclick = copyFunc;
+      
+      setStatus('Aguardando o outro dispositivo ler...', 'info');
     } catch (err) {
       console.error(err);
       setStatus('Erro: ' + err.message, 'error');
+      showScreen('home');
     }
   }
 
