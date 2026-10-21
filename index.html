@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#58a6ff">
-<title>TransfLocal v1.4 — Transferência Offline</title>
+<title>TransfLocal v1.5 — Transferência Offline</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -35,7 +35,6 @@
   .version-badge { font-size: 0.75rem; font-weight: 700; color: var(--accent-2); background: rgba(126, 231, 135, 0.1); border: 1px solid rgba(126, 231, 135, 0.3); padding: 0.1rem 0.4rem; border-radius: 6px; letter-spacing: 0.05em; }
   
   h2 { font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--accent); }
-  h3 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--accent-2); }
   p { margin-bottom: 0.8rem; line-height: 1.5; color: var(--fg-dim); }
   .subtitle { font-size: 0.9rem; margin-bottom: 1.5rem; }
 
@@ -77,9 +76,6 @@
     cursor: pointer;
     margin-bottom: 1rem;
   }
-  
-  .btn-row { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
-  .btn-row .btn { margin: 0; padding: 0.8rem; font-size: 0.9rem; }
 
   .qr-container {
     background: white;
@@ -94,38 +90,10 @@
   }
   .qr-container canvas,
   .qr-container img {
-    width: 320px !important;
-    height: 320px !important;
+    width: 300px !important;
+    height: 300px !important;
     max-width: 100%;
     display: block;
-  }
-
-  details.code-box {
-    margin: 1rem 0;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.8rem;
-  }
-  details.code-box summary {
-    cursor: pointer;
-    color: var(--accent);
-    font-size: 0.9rem;
-    font-weight: 600;
-    user-select: none;
-  }
-  details.code-box textarea {
-    width: 100%;
-    height: 80px;
-    background: transparent;
-    border: none;
-    color: var(--fg-dim);
-    font-family: monospace;
-    font-size: 0.75rem;
-    resize: none;
-    outline: none;
-    word-break: break-all;
-    margin-top: 0.8rem;
   }
 
   .video-container {
@@ -235,74 +203,43 @@
 <div id="screen-home" class="screen active">
   <div class="header-container">
     <h1>TransfLocal</h1>
-    <span class="version-badge">v1.4</span>
+    <span class="version-badge">v1.5</span>
   </div>
-  <p class="subtitle">Transferência de arquivos offline via hotspot</p>
+  <p class="subtitle">Conexão automática em 1 passo</p>
 
   <div class="card">
-    <h2>📤 Criar Sala</h2>
-    <p>Este dispositivo inicia a conexão.</p>
-    <button id="btnCreate" class="btn primary">Criar Sala</button>
+    <h2>💻 Computador (Criar)</h2>
+    <p>Gera o QR Code para o celular ler.</p>
+    <button id="btnCreate" class="btn primary">Gerar QR Code</button>
   </div>
 
   <div class="card">
-    <h2>📥 Entrar em Sala</h2>
-    <p>Este dispositivo conecta ao outro.</p>
-    <button id="btnJoin" class="btn secondary">Entrar em Sala</button>
+    <h2>📱 Celular (Ler)</h2>
+    <p>Escaneia o QR Code do computador e conecta.</p>
+    <button id="btnJoin" class="btn secondary">Escanear QR Code</button>
   </div>
 </div>
 
 <!-- ============ CREATE ============ -->
 <div id="screen-create" class="screen">
   <button class="btn-back" data-back>← Cancelar</button>
-  <h2>Passo 1: Mostre este Código</h2>
-  <p>No <strong>outro dispositivo</strong>, clique em "Entrar em Sala" e escaneie o código abaixo:</p>
+  <h2>Aguardando Celular...</h2>
+  <p>Aponte a câmera do celular para o código abaixo. A conexão será automática.</p>
   
-  <div id="qrOffer" class="qr-container"></div>
-  
-  <hr style="border-color: var(--border); margin: 1.5rem 0;">
-  
-  <h3>Passo 2: Receber a Resposta</h3>
-  <p>Após o outro dispositivo escanear, ele vai gerar um <strong>novo código</strong>. Você precisa escaneá-lo agora:</p>
-  
-  <div class="btn-row">
-    <button id="btnScanAnswer" class="btn secondary">📷 Escanear Resposta</button>
-    <button id="btnPasteAnswer" class="btn primary" style="background: var(--bg-card); border: 1px solid var(--border);">📋 Colar Resposta</button>
+  <div id="qrOffer" class="qr-container">
+    <p style="color: #0d1117; font-weight: bold; padding: 2rem;">Gerando código seguro...</p>
   </div>
-
-  <details class="code-box">
-    <summary>Mostrar código de Oferta em texto</summary>
-    <textarea id="codeOfferText" readonly></textarea>
-    <button id="btnCopyOffer" class="btn primary" style="padding: 0.4rem; font-size: 0.8rem; margin-top: 0.5rem;">Copiar Oferta</button>
-  </details>
 </div>
 
 <!-- ============ SCAN ============ -->
 <div id="screen-scan" class="screen">
   <button class="btn-back" data-back>← Cancelar</button>
-  <h2>Escaneando...</h2>
-  <p>Aponte a câmera para o QR Code do outro dispositivo.</p>
+  <h2>Ler QR Code</h2>
+  <p>Aponte a câmera para o QR Code exibido no computador.</p>
   <div class="video-container">
     <video id="scanVideo" autoplay playsinline muted></video>
   </div>
   <canvas id="scanCanvas" style="display:none"></canvas>
-</div>
-
-<!-- ============ ANSWER ============ -->
-<div id="screen-answer" class="screen">
-  <button class="btn-back" data-back>← Cancelar</button>
-  <h2>Passo 3: Mostre a Resposta</h2>
-  <p>O outro dispositivo (que criou a sala) precisa escanear o código abaixo para finalizar a conexão:</p>
-  
-  <div id="qrAnswer" class="qr-container"></div>
-
-  <button id="btnCopyAnswerTop" class="btn primary" style="margin-top: 1rem;">📋 Copiar Código de Resposta</button>
-
-  <details class="code-box">
-    <summary>Mostrar código de Resposta em texto</summary>
-    <textarea id="codeAnswerText" readonly></textarea>
-    <button id="btnCopyAnswer" class="btn primary" style="padding: 0.4rem; font-size: 0.8rem; margin-top: 0.5rem;">Copiar Resposta</button>
-  </details>
 </div>
 
 <!-- ============ CONNECTED ============ -->
@@ -328,17 +265,18 @@
 <div id="status" class="status"></div>
 
 <!-- ============ LIBRARIES ============ -->
-<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
+<!-- Agora usamos PeerJS para o "aperto de mão" automático -->
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
 <!-- ============ APP ============ -->
-<script defer>
+<script>
 (function () {
   'use strict';
 
   const $ = (id) => document.getElementById(id);
-  const SCREENS = ['home', 'create', 'scan', 'answer', 'connected'];
+  const SCREENS = ['home', 'create', 'scan', 'connected'];
 
   function showScreen(name) {
     SCREENS.forEach(s => $('screen-' + s).classList.toggle('active', s === name));
@@ -367,47 +305,35 @@
     return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
   }
 
-  const state = {
-    mode: null,
-    pc: null,
-    dc: null,
-    isConnected: false,
-    receiving: null,
-    scanPurpose: null,
-    scanInterval: null,
-    scanStream: null,
-  };
+  let peer = null;
+  let conn = null;
+  let isConnected = false;
+  let receiving = null;
+  let scanInterval = null;
+  let scanStream = null;
 
-  // Adicionado STUN do Google para ajudar na descoberta de rede local
-  const RTC_CONFIG = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
   const CHUNK_SIZE = 16 * 1024;
   const BUFFER_THRESHOLD = 1024 * 1024;
 
   function cleanup() {
     stopScanning();
-    if (state.pc) {
-      try { state.pc.close(); } catch (e) {}
-      state.pc = null;
-    }
-    state.dc = null;
-    state.isConnected = false;
-    state.receiving = null;
+    if (conn) { try { conn.close(); } catch(e){} conn = null; }
+    if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+    isConnected = false;
+    receiving = null;
   }
 
   // ---------- Home ----------
   $('btnCreate').addEventListener('click', () => {
     cleanup();
-    state.mode = 'create';
     showScreen('create');
-    startOffer();
+    startPeer(true); // true = é o host (computador)
   });
 
   $('btnJoin').addEventListener('click', () => {
     cleanup();
-    state.mode = 'join';
-    state.scanPurpose = 'offer';
     showScreen('scan');
-    startScanning();
+    startScanning(); // O celular só escaneia e conecta
   });
 
   document.querySelectorAll('[data-back]').forEach(btn => {
@@ -418,140 +344,78 @@
     });
   });
 
-  // ---------- Offer ----------
-  async function startOffer() {
-    setStatus('Gerando oferta...', 'info');
-    try {
-      const pc = new RTCPeerConnection(RTC_CONFIG);
-      state.pc = pc;
+  // ---------- PeerJS Logic ----------
+  function startPeer(isHost) {
+    if (isHost) setStatus('Gerando código de conexão...', 'info');
+    
+    // Cria um ID aleatório para a sala
+    const roomId = 'transf-' + Math.random().toString(36).substring(2, 8);
+    peer = new Peer(roomId, { debug: 0 });
 
-      const dc = pc.createDataChannel('files');
-      state.dc = dc;
-      setupDataChannel(dc);
-
-      pc.onconnectionstatechange = onConnState;
-
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      await waitIceGathering(pc);
-
-      const payload = compress(pc.localDescription);
-      
-      displayQR('qrOffer', payload);
-      $('codeOfferText').value = payload;
-      
-      $('btnCopyOffer').onclick = async () => {
-        try {
-          await navigator.clipboard.writeText(payload);
-          setStatus('Código copiado!', 'success');
-        } catch (e) {
-          $('codeOfferText').select();
-          document.execCommand('copy');
-          setStatus('Código copiado!', 'success');
-        }
-      };
-
-      setStatus('Aguardando leitura...', 'info');
-
-      $('btnScanAnswer').onclick = () => {
-        state.scanPurpose = 'answer';
-        showScreen('scan');
-        startScanning();
-      };
-
-      $('btnPasteAnswer').onclick = () => {
-        const code = prompt('Cole o código da RESPOSTA do outro dispositivo:');
-        if (code && code.trim()) handleScanned(code.trim());
-      };
-    } catch (err) {
-      console.error(err);
-      setStatus('Erro: ' + err.message, 'error');
-    }
-  }
-
-  // ---------- Answer ----------
-  async function createAnswer(offerSdp) {
-    setStatus('Gerando resposta...', 'info');
-    try {
-      const pc = new RTCPeerConnection(RTC_CONFIG);
-      state.pc = pc;
-
-      pc.ondatachannel = (e) => {
-        state.dc = e.channel;
-        setupDataChannel(e.channel);
-      };
-
-      pc.onconnectionstatechange = onConnState;
-
-      await pc.setRemoteDescription({ type: 'offer', sdp: offerSdp });
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      await waitIceGathering(pc);
-
-      const payload = compress(pc.localDescription);
-
-      showScreen('answer');
-      displayQR('qrAnswer', payload);
-      $('codeAnswerText').value = payload;
-      
-      const copyFunc = async () => {
-        try {
-          await navigator.clipboard.writeText(payload);
-          setStatus('Código copiado!', 'success');
-        } catch (e) {
-          $('codeAnswerText').select();
-          document.execCommand('copy');
-          setStatus('Código copiado!', 'success');
-        }
-      };
-      
-      $('btnCopyAnswer').onclick = copyFunc;
-      $('btnCopyAnswerTop').onclick = copyFunc;
-      
-      setStatus('Aguardando o outro dispositivo ler...', 'info');
-    } catch (err) {
-      console.error(err);
-      setStatus('Erro: ' + err.message, 'error');
-      showScreen('home');
-    }
-  }
-
-  // ---------- Handle Scanned/Pasted ----------
-  async function handleScanned(text) {
-    try {
-      const desc = decompress(text);
-      if (!desc || !desc.type || !desc.sdp) throw new Error('Código inválido ou corrompido');
-
-      if (state.scanPurpose === 'offer') {
-        await createAnswer(desc.sdp);
-      } else if (state.scanPurpose === 'answer') {
-        await state.pc.setRemoteDescription({ type: 'answer', sdp: desc.sdp });
-        setStatus('Conectando...', 'info');
-        if (!state.isConnected) showScreen('create');
+    peer.on('open', (id) => {
+      if (isHost) {
+        // O PC gera o QR Code com o ID da sala
+        const el = $('qrOffer');
+        el.innerHTML = '';
+        new QRCode(el, {
+          text: id,
+          width: 512,
+          height: 512,
+          correctLevel: QRCode.CorrectLevel.L,
+          colorDark: '#0d1117',
+          colorLight: '#ffffff'
+        });
+        setStatus('Aguardando celular...', 'info');
       }
-    } catch (err) {
-      console.error(err);
-      setStatus('Erro no código: ' + err.message, 'error');
-      if (state.scanPurpose === 'offer') showScreen('home');
-      else showScreen('create');
-    }
-  }
+    });
 
-  // ---------- QR display ----------
-  function displayQR(elementId, payload) {
-    const el = $(elementId);
-    el.innerHTML = '';
-    new QRCode(el, {
-      text: payload,
-      width: 512,
-      height: 512,
-      correctLevel: QRCode.CorrectLevel.L,
-      colorDark: '#0d1117',
-      colorLight: '#ffffff'
+    peer.on('connection', (connection) => {
+      conn = connection;
+      setupConnection();
+    });
+
+    peer.on('error', (err) => {
+      console.error(err);
+      setStatus('Erro de rede: ' + err.type, 'error');
     });
   }
 
-  // ---------- QR scanning ----------
+  function joinPeer(hostId) {
+    setStatus('Conectando ao computador...', 'info');
+    peer = new Peer({ debug: 0 });
+    
+    peer.on('open', () => {
+      conn = peer.connect(hostId, { reliable: true });
+      setupConnection();
+    });
+
+    peer.on('error', (err) => {
+      console.error(err);
+      setStatus('Erro ao conectar. Verifique a internet do hotspot.', 'error');
+      showScreen('home');
+    });
+  }
+
+  function setupConnection() {
+    conn.on('open', () => {
+      if (isConnected) return;
+      isConnected = true;
+      setStatus('Conectado!', 'success');
+      showScreen('connected');
+    });
+
+    conn.on('data', (data) => {
+      if (typeof data === 'string') {
+        try { handleControl(JSON.parse(data)); } catch (err) { console.error(err); }
+      } else {
+        handleChunk(data);
+      }
+    });
+
+    conn.on('close', () => setStatus('Conexão encerrada', 'error'));
+  }
+
+  // ---------- QR scanning (Apenas no Celular) ----------
   async function startScanning() {
     const video = $('scanVideo');
     const canvas = $('scanCanvas');
@@ -560,7 +424,7 @@
     setStatus('Aponte a câmera para o QR Code', 'info');
 
     try {
-      state.scanStream = await navigator.mediaDevices.getUserMedia({
+      scanStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
         audio: false
       });
@@ -569,10 +433,10 @@
       return;
     }
 
-    video.srcObject = state.scanStream;
+    video.srcObject = scanStream;
     try { await video.play(); } catch (e) {}
 
-    state.scanInterval = setInterval(() => {
+    scanInterval = setInterval(() => {
       if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -581,110 +445,45 @@
       const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
       if (code && code.data) {
         stopScanning();
-        handleScanned(code.data);
+        joinPeer(code.data.trim()); // Conecta usando o ID lido
       }
     }, 250);
   }
 
   function stopScanning() {
-    if (state.scanInterval) {
-      clearInterval(state.scanInterval);
-      state.scanInterval = null;
+    if (scanInterval) {
+      clearInterval(scanInterval);
+      scanInterval = null;
     }
-    if (state.scanStream) {
-      state.scanStream.getTracks().forEach(t => t.stop());
-      state.scanStream = null;
+    if (scanStream) {
+      scanStream.getTracks().forEach(t => t.stop());
+      scanStream = null;
     }
   }
 
-  // ---------- Connection ----------
-  function onConnState() {
-    const pc = state.pc;
-    if (!pc) return;
-    if (pc.connectionState === 'connected') onConnected();
-    else if (pc.connectionState === 'failed') setStatus('Falha na conexão. Tente novamente.', 'error');
-    else if (pc.connectionState === 'disconnected') setStatus('Conexão instável...', 'error');
-  }
-
-  function onConnected() {
-    if (state.isConnected) return;
-    state.isConnected = true;
-    setStatus('Conectado!', 'success');
-    showScreen('connected');
-  }
-
-  function waitIceGathering(pc) {
-    return new Promise(res => {
-      if (pc.iceGatheringState === 'complete') return res();
-      const check = () => {
-        if (pc.iceGatheringState === 'complete') {
-          pc.removeEventListener('icegatheringstatechange', check);
-          res();
-        }
-      };
-      pc.addEventListener('icegatheringstatechange', check);
-      setTimeout(res, 3000);
-    });
-  }
-
-  // ---------- SDP compression ----------
-  function compress(desc) {
-    return LZString.compressToEncodedURIComponent(
-      JSON.stringify({ t: desc.type, s: desc.sdp })
-    );
-  }
-
-  function decompress(text) {
-    const str = LZString.decompressFromEncodedURIComponent(text);
-    if (!str) return null;
-    const obj = JSON.parse(str);
-    return { type: obj.t, sdp: obj.s };
-  }
-
-  // ---------- DataChannel ----------
-  function setupDataChannel(dc) {
-    dc.binaryType = 'arraybuffer';
-    dc.bufferedAmountLowThreshold = BUFFER_THRESHOLD;
-
-    dc.onopen = () => {
-      if (state.pc.connectionState !== 'connected') onConnected();
-    };
-
-    dc.onclose = () => setStatus('Conexão encerrada', 'error');
-    dc.onerror = (e) => console.error('DC error', e);
-
-    dc.onmessage = (e) => {
-      if (typeof e.data === 'string') {
-        try { handleControl(JSON.parse(e.data)); } catch (err) { console.error(err); }
-      } else {
-        handleChunk(e.data);
-      }
-    };
-  }
-
+  // ---------- Data Handling ----------
   function handleControl(msg) {
     if (msg.tipo === 'inicio') {
       const item = addTransferItem('recv', msg.nome, msg.tamanho);
-      state.receiving = { nome: msg.nome, tamanho: msg.tamanho, mime: msg.mime, partes: [], recebidos: 0, item };
+      receiving = { nome: msg.nome, tamanho: msg.tamanho, mime: msg.mime, partes: [], recebidos: 0, item };
     } else if (msg.tipo === 'fim') {
-      if (!state.receiving) return;
-      const blob = new Blob(state.receiving.partes, { type: state.receiving.mime });
+      if (!receiving) return;
+      const blob = new Blob(receiving.partes, { type: receiving.mime });
       const url = URL.createObjectURL(blob);
-      finishTransfer(state.receiving.item, state.receiving.nome, url, true);
-      state.receiving = null;
+      finishTransfer(receiving.item, receiving.nome, url, true);
+      receiving = null;
     }
   }
 
   function handleChunk(data) {
-    if (!state.receiving) return;
-    state.receiving.partes.push(data);
-    state.receiving.recebidos += data.byteLength;
-    updateProgress(state.receiving.item, state.receiving.recebidos, state.receiving.tamanho);
+    if (!receiving) return;
+    receiving.partes.push(data);
+    receiving.recebidos += data.byteLength;
+    updateProgress(receiving.item, receiving.recebidos, receiving.tamanho);
   }
 
-  // ---------- File sending ----------
   async function sendFiles(files) {
-    if (!state.dc || state.dc.readyState !== 'open') {
+    if (!conn || !conn.open) {
       setStatus('Sem conexão', 'error');
       return;
     }
@@ -694,7 +493,7 @@
       for (const file of files) {
         await sendFile(file);
       }
-      state.dc.send(JSON.stringify({ tipo: 'todos_concluidos' }));
+      conn.send(JSON.stringify({ tipo: 'todos_concluidos' }));
       setStatus('Todos os arquivos enviados', 'success');
     } catch (err) {
       console.error(err);
@@ -705,21 +504,18 @@
   }
 
   async function sendFile(file) {
-    const dc = state.dc;
     const item = addTransferItem('send', file.name, file.size);
 
-    dc.send(JSON.stringify({ tipo: 'inicio', nome: file.name, tamanho: file.size, mime: file.type || 'application/octet-stream' }));
+    conn.send(JSON.stringify({ tipo: 'inicio', nome: file.name, tamanho: file.size, mime: file.type || 'application/octet-stream' }));
 
     let offset = 0;
     let lastUpdate = 0;
 
     while (offset < file.size) {
-      while (dc.bufferedAmount > BUFFER_THRESHOLD) {
-        await new Promise(res => dc.addEventListener('bufferedamountlow', res, { once: true }));
-      }
+      // O PeerJS gerencia o buffer internamente usando a API do WebRTC
       const slice = file.slice(offset, offset + CHUNK_SIZE);
       const buf = await slice.arrayBuffer();
-      dc.send(buf);
+      conn.send(buf);
       offset += buf.byteLength;
 
       const now = Date.now();
@@ -727,9 +523,14 @@
         updateProgress(item, offset, file.size);
         lastUpdate = now;
       }
+      
+      // Dá um pequeno respiro para não travar a interface em arquivos gigantes
+      if (offset % (CHUNK_SIZE * 50) === 0) {
+        await new Promise(r => setTimeout(r, 10));
+      }
     }
 
-    dc.send(JSON.stringify({ tipo: 'fim' }));
+    conn.send(JSON.stringify({ tipo: 'fim' }));
     finishTransfer(item, file.name, null, false);
   }
 
@@ -784,7 +585,7 @@
     sendFiles(files);
   });
 
-  // ---------- Register SW & Auto-Reload ----------
+  // ---------- Register SW ----------
   if ('serviceWorker' in navigator) {
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -798,13 +599,6 @@
         console.warn('SW registration failed:', err);
       });
     });
-  }
-
-  // ---------- Secure-context warning ----------
-  if (location.protocol !== 'https:' &&
-      location.hostname !== 'localhost' &&
-      location.hostname !== '127.0.0.1') {
-    setTimeout(() => setStatus('Aviso: use HTTPS (GitHub Pages) para câmera e WebRTC', 'error'), 1000);
   }
 
 })();

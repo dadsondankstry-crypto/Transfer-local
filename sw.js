@@ -1,5 +1,4 @@
-// ALTERE ESSA VERSÃO TODA VEZ QUE MUDAR O index.html
-const CACHE = 'transflocal-v1.4';
+const CACHE = 'transflocal-v1.5';
 
 const LOCAL_ASSETS = [
   './',
@@ -11,7 +10,7 @@ const LOCAL_ASSETS = [
 ];
 
 const CDN_ASSETS = [
-  'https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js',
+  'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
   'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
   'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js'
 ];
