@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#58a6ff">
-<title>TransfLocal — Transferência Offline</title>
+<title>TransfLocal 1.2 — Transferência Offline</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -82,24 +82,46 @@
     font-size: 0.85rem;
     padding: 0.5rem;
     margin: 0.5rem 0;
+    display: inline-block;
   }
 
   .qr-container {
     background: white;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 12px;
     margin: 1rem auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 200px;
-    max-width: 420px;
+    width: fit-content;
+    max-width: 100%;
   }
   .qr-container canvas,
   .qr-container img {
+    width: 260px !important;
+    height: 260px !important;
     max-width: 100%;
-    height: auto;
     display: block;
+  }
+
+  .code-box {
+    margin: 1rem 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem;
+  }
+  .code-box textarea {
+    width: 100%;
+    height: 70px;
+    background: transparent;
+    border: none;
+    color: var(--fg-dim);
+    font-family: monospace;
+    font-size: 0.75rem;
+    resize: none;
+    outline: none;
+    word-break: break-all;
   }
 
   .video-container {
@@ -229,6 +251,7 @@
     <h2>📥 Entrar em Sala</h2>
     <p>Este dispositivo escaneia o convite do outro. Ideal para o computador.</p>
     <button id="btnJoin" class="btn secondary">Entrar em Sala</button>
+    <button id="btnJoinPaste" class="btn-link" style="text-align:center; width:100%;">Ou colar código de convite manualmente</button>
   </div>
 
   <div class="card">
@@ -247,9 +270,17 @@
   <button class="btn-back" data-back>← Voltar</button>
   <h2>Criar Sala</h2>
   <p>Peça para o outro dispositivo escanear este QR Code:</p>
+  
   <div id="qrOffer" class="qr-container"></div>
-  <button id="btnScanAnswer" class="btn secondary">📷 Escanear Resposta</button>
-  <button id="btnPasteAnswer" class="btn-link">Ou colar código manualmente</button>
+  
+  <div class="code-box">
+    <p style="font-size: 0.8rem; margin-bottom: 0.3rem;">Se preferir, envie este código de texto:</p>
+    <textarea id="codeOfferText" readonly></textarea>
+    <button id="btnCopyOffer" class="btn-link" style="margin: 0; padding: 0.2rem 0;">Copiar código</button>
+  </div>
+
+  <button id="btnScanAnswer" class="btn secondary" style="margin-top: 1rem;">📷 Escanear Resposta</button>
+  <button id="btnPasteAnswer" class="btn-link" style="text-align:center; width:100%;">Ou colar código de resposta manualmente</button>
 </div>
 
 <!-- ============ SCAN ============ -->
@@ -268,8 +299,14 @@
   <button class="btn-back" data-back>← Cancelar</button>
   <h2>Resposta Gerada</h2>
   <p>Mostre este QR Code para o outro dispositivo escanear:</p>
+  
   <div id="qrAnswer" class="qr-container"></div>
-  <button id="btnCopyAnswer" class="btn-link">Copiar código manualmente</button>
+
+  <div class="code-box">
+    <p style="font-size: 0.8rem; margin-bottom: 0.3rem;">Se o QR Code não funcionar, envie este código de resposta:</p>
+    <textarea id="codeAnswerText" readonly></textarea>
+    <button id="btnCopyAnswer" class="btn-link" style="margin: 0; padding: 0.2rem 0;">Copiar código</button>
+  </div>
 </div>
 
 <!-- ============ CONNECTED ============ -->
@@ -304,7 +341,6 @@
 (function () {
   'use strict';
 
-  // ---------- Utils ----------
   const $ = (id) => document.getElementById(id);
   const SCREENS = ['home', 'create', 'scan', 'answer', 'connected'];
 
@@ -335,7 +371,6 @@
     return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
   }
 
-  // ---------- State ----------
   const state = {
     mode: null,
     pc: null,
@@ -345,14 +380,12 @@
     scanPurpose: null,
     scanInterval: null,
     scanStream: null,
-    lastAnswerCode: null,
   };
 
   const RTC_CONFIG = { iceServers: [] };
   const CHUNK_SIZE = 16 * 1024;
   const BUFFER_THRESHOLD = 1024 * 1024;
 
-  // ---------- Cleanup ----------
   function cleanup() {
     stopScanning();
     if (state.pc) {
@@ -362,7 +395,6 @@
     state.dc = null;
     state.isConnected = false;
     state.receiving = null;
-    state.lastAnswerCode = null;
   }
 
   // ---------- Home ----------
@@ -379,6 +411,16 @@
     state.scanPurpose = 'offer';
     showScreen('scan');
     startScanning();
+  });
+
+  $('btnJoinPaste').addEventListener('click', () => {
+    const code = prompt('Cole o código do convite (Oferta) enviado pelo outro dispositivo:');
+    if (code && code.trim()) {
+      cleanup();
+      state.mode = 'join';
+      state.scanPurpose = 'offer';
+      handleScanned(code.trim());
+    }
   });
 
   document.querySelectorAll('[data-back]').forEach(btn => {
@@ -407,8 +449,22 @@
       await waitIceGathering(pc);
 
       const payload = compress(pc.localDescription);
+      
       displayQR('qrOffer', payload);
-      setStatus('Escaneie este código no outro dispositivo', 'info');
+      $('codeOfferText').value = payload;
+      
+      $('btnCopyOffer').onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(payload);
+          setStatus('Código copiado!', 'success');
+        } catch (e) {
+          $('codeOfferText').select();
+          document.execCommand('copy');
+          setStatus('Código copiado!', 'success');
+        }
+      };
+
+      setStatus('Escaneie ou copie o código', 'info');
 
       $('btnScanAnswer').onclick = () => {
         state.scanPurpose = 'answer';
@@ -446,31 +502,34 @@
       await waitIceGathering(pc);
 
       const payload = compress(pc.localDescription);
-      state.lastAnswerCode = payload;
 
       showScreen('answer');
       displayQR('qrAnswer', payload);
-      setStatus('Mostre este código para o outro dispositivo', 'info');
-
+      $('codeAnswerText').value = payload;
+      
       $('btnCopyAnswer').onclick = async () => {
         try {
           await navigator.clipboard.writeText(payload);
           setStatus('Código copiado!', 'success');
         } catch (e) {
-          prompt('Copie o código:', payload);
+          $('codeAnswerText').select();
+          document.execCommand('copy');
+          setStatus('Código copiado!', 'success');
         }
       };
+      
+      setStatus('Mostre ou envie este código de resposta', 'info');
     } catch (err) {
       console.error(err);
       setStatus('Erro: ' + err.message, 'error');
     }
   }
 
-  // ---------- Handle Scanned ----------
+  // ---------- Handle Scanned/Pasted ----------
   async function handleScanned(text) {
     try {
       const desc = decompress(text);
-      if (!desc || !desc.type || !desc.sdp) throw new Error('Código inválido');
+      if (!desc || !desc.type || !desc.sdp) throw new Error('Código inválido ou corrompido');
 
       if (state.scanPurpose === 'offer') {
         await createAnswer(desc.sdp);
@@ -482,6 +541,8 @@
     } catch (err) {
       console.error(err);
       setStatus('Erro no código: ' + err.message, 'error');
+      if (state.scanPurpose === 'offer') showScreen('home');
+      else showScreen('create');
     }
   }
 
@@ -599,16 +660,11 @@
     };
 
     dc.onclose = () => setStatus('Conexão encerrada', 'error');
-
     dc.onerror = (e) => console.error('DC error', e);
 
     dc.onmessage = (e) => {
       if (typeof e.data === 'string') {
-        try {
-          handleControl(JSON.parse(e.data));
-        } catch (err) {
-          console.error('Parse error', err);
-        }
+        try { handleControl(JSON.parse(e.data)); } catch (err) { console.error(err); }
       } else {
         handleChunk(e.data);
       }
@@ -618,14 +674,7 @@
   function handleControl(msg) {
     if (msg.tipo === 'inicio') {
       const item = addTransferItem('recv', msg.nome, msg.tamanho);
-      state.receiving = {
-        nome: msg.nome,
-        tamanho: msg.tamanho,
-        mime: msg.mime,
-        partes: [],
-        recebidos: 0,
-        item
-      };
+      state.receiving = { nome: msg.nome, tamanho: msg.tamanho, mime: msg.mime, partes: [], recebidos: 0, item };
     } else if (msg.tipo === 'fim') {
       if (!state.receiving) return;
       const blob = new Blob(state.receiving.partes, { type: state.receiving.mime });
@@ -668,21 +717,14 @@
     const dc = state.dc;
     const item = addTransferItem('send', file.name, file.size);
 
-    dc.send(JSON.stringify({
-      tipo: 'inicio',
-      nome: file.name,
-      tamanho: file.size,
-      mime: file.type || 'application/octet-stream'
-    }));
+    dc.send(JSON.stringify({ tipo: 'inicio', nome: file.name, tamanho: file.size, mime: file.type || 'application/octet-stream' }));
 
     let offset = 0;
     let lastUpdate = 0;
 
     while (offset < file.size) {
       while (dc.bufferedAmount > BUFFER_THRESHOLD) {
-        await new Promise(res =>
-          dc.addEventListener('bufferedamountlow', res, { once: true })
-        );
+        await new Promise(res => dc.addEventListener('bufferedamountlow', res, { once: true }));
       }
       const slice = file.slice(offset, offset + CHUNK_SIZE);
       const buf = await slice.arrayBuffer();
@@ -704,7 +746,6 @@
   function addTransferItem(kind, name, size) {
     const list = $('transfers-' + kind);
     if (!list) return null;
-    // Remove "Aguardando..." placeholder
     const placeholder = list.querySelector('p');
     if (placeholder) placeholder.remove();
 
